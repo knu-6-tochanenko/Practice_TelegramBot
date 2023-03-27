@@ -34,3 +34,5 @@ kotlin {
 tasks.named<JavaExec>("run") {
     systemProperty("apiKey", System.getProperty("apiKey"))
 }
+
+tasks.create("stage").dependsOn("installDist")
