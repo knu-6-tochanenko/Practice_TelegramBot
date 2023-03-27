@@ -8,7 +8,10 @@ import kotlinx.coroutines.runBlocking
 fun main(): Unit = runBlocking {
     println("Bot is Up and Running...")
 
-    val apiToken = System.getProperty("apiKey") ?: ""
+    val apiToken = if (System.getProperty("apiKey") != null)
+        System.getProperty("apiKey")
+    else if (System.getenv("apiKey") != null)
+        System.getenv("apiKey") else ""
 
     if (apiToken == "") {
         println("Could not find API TOKEN")
