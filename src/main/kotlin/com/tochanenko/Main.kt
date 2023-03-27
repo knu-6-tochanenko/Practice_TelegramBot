@@ -1,8 +1,16 @@
 package com.tochanenko
 
 import eu.vendeli.tgbot.TelegramBot
+import eu.vendeli.tgbot.api.botactions.setWebhook
 import eu.vendeli.tgbot.api.message
 import eu.vendeli.tgbot.types.ParseMode
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 
 fun main(): Unit = runBlocking {
@@ -19,6 +27,8 @@ fun main(): Unit = runBlocking {
     }
 
     val bot = TelegramBot(apiToken)
+
+    setWebhook(System.getenv("HOST") + "/" + System.getenv("apiKey")).send(bot)
 
     bot.handleUpdates {
         onMessage {
@@ -38,5 +48,14 @@ fun main(): Unit = runBlocking {
                 .send(user, bot)
         }
     }
+
+    embeddedServer(Netty, port = System.getenv("PORT").toInt()) {
+        routing {
+            post("/" + System.getenv("apiKey")) {
+                bot.update.parseAndHandle(call.receiveText())
+                call.respond(HttpStatusCode.OK)
+            }
+        }
+    }.start(wait = true)
 }
 

@@ -1,0 +1,1 @@
+web: ./build/install/practice-tochanenko-m2/bin/practice-tochanenko-m2

@@ -21,6 +21,8 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("eu.vendeli:telegram-bot:2.7.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-Beta")
+    implementation("io.ktor:ktor-server-core-jvm:2.2.3")
+    implementation("io.ktor:ktor-server-netty-jvm:2.2.3")
 }
 
 tasks.test {
