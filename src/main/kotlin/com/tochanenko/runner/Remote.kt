@@ -15,7 +15,7 @@ suspend fun runRemote(bot: TelegramBot) {
     println("Remote Mode")
     setWebhook("https://" + parseEnvVar("HOST") + "/" + parseEnvVar("apiKey")).send(bot)
 
-    bot.update.setBehaviour {
+    bot.update.setListener {
         handle(it)
     }
 
