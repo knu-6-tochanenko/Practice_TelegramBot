@@ -1,1 +1,1 @@
-web: ./build/install/practice-tochanenko-m2/bin/practice-tochanenko-m2
+web: ./build/install/Practice_TelegramBot/bin/Practice_TelegramBot
