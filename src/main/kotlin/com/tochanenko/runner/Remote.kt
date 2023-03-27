@@ -12,7 +12,6 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 suspend fun runRemote(bot: TelegramBot) {
-    println("Remote Mode")
     setWebhook("https://" + parseEnvVar("HOST") + "/" + parseEnvVar("apiKey")).send(bot)
 
     bot.update.setListener {
