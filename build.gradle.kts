@@ -30,3 +30,7 @@ tasks.test {
 kotlin {
     jvmToolchain(11)
 }
+
+tasks.named<JavaExec>("run") {
+    systemProperty("apiKey", System.getProperty("apiKey"))
+}

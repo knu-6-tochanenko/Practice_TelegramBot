@@ -6,8 +6,16 @@ import eu.vendeli.tgbot.types.ParseMode
 import kotlinx.coroutines.runBlocking
 
 fun main(): Unit = runBlocking {
-    print("Bot is Up and Running...")
-    val bot = TelegramBot("6107739153:AAHJbmHIvMCCyKu_UuOr14QTrGVov4gFPtY")
+    println("Bot is Up and Running...")
+
+    val apiToken = System.getProperty("apiKey") ?: ""
+
+    if (apiToken == "") {
+        println("Could not find API TOKEN")
+        return@runBlocking
+    }
+
+    val bot = TelegramBot(apiToken)
 
     bot.handleUpdates {
         onMessage {
@@ -28,3 +36,4 @@ fun main(): Unit = runBlocking {
         }
     }
 }
+
