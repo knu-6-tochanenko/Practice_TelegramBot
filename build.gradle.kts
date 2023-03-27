@@ -7,7 +7,7 @@ group = "com.tochanenko"
 version = "1.0-SNAPSHOT"
 
 application {
-    mainClass.set("com.tochanenko.Main")
+    mainClass.set("com.tochanenko.MainKt")
 }
 
 repositories {
