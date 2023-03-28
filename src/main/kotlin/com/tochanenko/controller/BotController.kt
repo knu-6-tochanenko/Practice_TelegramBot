@@ -2,9 +2,11 @@ package com.tochanenko.controller
 
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.annotations.CommandHandler
+import eu.vendeli.tgbot.annotations.UnprocessedHandler
 import eu.vendeli.tgbot.api.message
 import eu.vendeli.tgbot.types.ParseMode
 import eu.vendeli.tgbot.types.internal.ProcessedUpdate
+import io.ktor.http.cio.*
 
 class BotController {
     @CommandHandler(["/start"])
@@ -24,5 +26,10 @@ class BotController {
         message { "`/start` - Start Bot\n`/about` - About bot creator\n`/commands` - List of all available commands" }
             .options { parseMode = ParseMode.Markdown }
             .send(update.user, bot)
+    }
+
+    @UnprocessedHandler
+    suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
+        message { update.text ?: "" }.send(update.user, bot)
     }
 }
