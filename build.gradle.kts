@@ -23,6 +23,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0-Beta")
     implementation("io.ktor:ktor-server-core-jvm:2.2.3")
     implementation("io.ktor:ktor-server-netty-jvm:2.2.3")
+    implementation("com.aallam.openai:openai-client:3.2.0")
 }
 
 tasks.test {
@@ -35,6 +36,7 @@ kotlin {
 
 tasks.named<JavaExec>("run") {
     systemProperty("apiKey", System.getProperty("apiKey"))
+    systemProperty("OpenAIApiKey", System.getProperty("OpenAIApiKey"))
 }
 
 tasks.create("stage").dependsOn("installDist")

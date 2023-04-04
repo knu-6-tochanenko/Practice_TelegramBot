@@ -1,12 +1,19 @@
 package com.tochanenko.controller
 
+import com.aallam.openai.api.BetaOpenAI
+import com.aallam.openai.api.chat.ChatCompletion
+import com.aallam.openai.api.chat.ChatCompletionRequest
+import com.aallam.openai.api.chat.ChatMessage
+import com.aallam.openai.api.chat.ChatRole
+import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.client.OpenAI
+import com.tochanenko.OpenAIApiToken
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.annotations.CommandHandler
 import eu.vendeli.tgbot.annotations.UnprocessedHandler
 import eu.vendeli.tgbot.api.message
 import eu.vendeli.tgbot.types.ParseMode
 import eu.vendeli.tgbot.types.internal.ProcessedUpdate
-import io.ktor.http.cio.*
 
 class BotController {
     @CommandHandler(["/start"])
@@ -28,8 +35,22 @@ class BotController {
             .send(update.user, bot)
     }
 
+    @OptIn(BetaOpenAI::class)
     @UnprocessedHandler
     suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
-        message { update.text ?: "" }.send(update.user, bot)
+        val openAI = OpenAI(OpenAIApiToken)
+
+        val chatCompletionRequest = ChatCompletionRequest(
+            model = ModelId("gpt-3.5-turbo"),
+            messages = listOf(
+                ChatMessage(
+                    role = ChatRole.User,
+                    content = update.text!!
+                )
+            )
+        )
+        val completion: ChatCompletion = openAI.chatCompletion(chatCompletionRequest)
+
+        message { completion.choices[0].message?.content ?: "" }.send(update.user, bot)
     }
 }

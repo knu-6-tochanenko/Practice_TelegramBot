@@ -12,9 +12,15 @@ import io.ktor.server.routing.*
 import kotlinx.coroutines.runBlocking
 
 val apiToken = parseEnvVar("apiKey")
+val OpenAIApiToken = parseEnvVar("OpenAIApiKey")
 
 fun main(): Unit = runBlocking {
     if (apiToken.isEmpty()) {
+        println("Could not find API TOKEN")
+        return@runBlocking
+    }
+
+    if (OpenAIApiToken.isEmpty()) {
         println("Could not find API TOKEN")
         return@runBlocking
     }
