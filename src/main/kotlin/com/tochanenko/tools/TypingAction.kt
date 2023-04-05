@@ -6,19 +6,17 @@ import eu.vendeli.tgbot.types.chat.ChatAction
 import kotlinx.coroutines.*
 
 class TypingAction(
-    private val telegramId: Long,
+    private val userId: Long,
     private val bot: TelegramBot
 ) {
-    private val delay = 5000L
-    private val job = CoroutineScope(Dispatchers.IO).launch(start = CoroutineStart.LAZY) {
+    private val delayMillis: Long = 5000L
+    private val job: Job = CoroutineScope(Dispatchers.IO).launch(start = CoroutineStart.LAZY) {
         while (isActive) {
-            chatAction(null, ChatAction.Typing).send(telegramId, bot)
-            delay(delay)
+            chatAction(null, ChatAction.Typing).send(userId, bot)
+            delay(delayMillis)
         }
     }
 
     fun start(): TypingAction = this.also { job.start() }
     fun stop() = job.cancel()
 }
-
-
