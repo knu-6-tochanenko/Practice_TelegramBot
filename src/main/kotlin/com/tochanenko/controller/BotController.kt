@@ -6,8 +6,8 @@ import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.model.ModelId
-import com.aallam.openai.client.OpenAI
-import com.tochanenko.OpenAIApiToken
+import com.tochanenko.OPEN_AI
+import com.tochanenko.tools.TypingAction
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.annotations.CommandHandler
 import eu.vendeli.tgbot.annotations.UnprocessedHandler
@@ -38,7 +38,7 @@ class BotController {
     @OptIn(BetaOpenAI::class)
     @UnprocessedHandler
     suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
-        val openAI = OpenAI(OpenAIApiToken)
+        val typingAction = TypingAction(update.user.id, bot).start()
 
         val chatCompletionRequest = ChatCompletionRequest(
             model = ModelId("gpt-3.5-turbo"),
@@ -49,8 +49,9 @@ class BotController {
                 )
             )
         )
-        val completion: ChatCompletion = openAI.chatCompletion(chatCompletionRequest)
+        val completion: ChatCompletion = OPEN_AI.chatCompletion(chatCompletionRequest)
 
+        typingAction.stop()
         message { completion.choices[0].message?.content ?: "" }.send(update.user, bot)
     }
 }
