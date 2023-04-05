@@ -1,1 +1,1 @@
-web: java -Dserver.port=$PORT $JAVA_OPTS -jar ./build/libs/Practice_TelegramBot-1.0-practice-tochanenko-m2.jar
+worker: java $JAVA_OPTS -Dserver.port=$PORT -jar ./build/libs/Practice_TelegramBot-1.0-practice-tochanenko-m2.jar
