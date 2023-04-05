@@ -35,7 +35,7 @@ fun main(): Unit = runBlocking {
         handle(it)
     }
 
-    io.ktor.server.engine.embeddedServer(Netty, port = parseEnvVar("PORT").toInt()) {
+    io.ktor.server.engine.embeddedServer(Netty, port = System.getenv("PORT")?.toInt() ?: 23567) {
         routing {
             post("/" + parseEnvVar("apiKey")) {
                 bot.update.parseAndHandle(call.receiveText())
