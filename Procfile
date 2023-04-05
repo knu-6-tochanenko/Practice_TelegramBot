@@ -1,1 +1,1 @@
-web: ./build/install/Practice_TelegramBot/bin/Practice_TelegramBot
+web: ./build/install/Practice_TelegramBot/bin/Practice_TelegramBot -Dserver.port=$PORT
