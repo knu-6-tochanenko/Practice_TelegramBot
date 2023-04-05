@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.tochanenko"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 application {
     mainClass.set("com.tochanenko.MainKt")
@@ -40,3 +40,20 @@ tasks.named<JavaExec>("run") {
 }
 
 tasks.create("stage").dependsOn("installDist")
+
+tasks {
+    val fatJar = register<Jar>("fatJar") {
+        dependsOn.addAll(listOf("compileJava", "compileKotlin", "processResources"))
+        archiveClassifier.set("practice-tochanenko-m2")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        manifest { attributes(mapOf("Main-Class" to application.mainClass)) }
+        val sourcesMain = sourceSets.main.get()
+        val contents = configurations.runtimeClasspath.get()
+            .map { if (it.isDirectory) it else zipTree(it) } +
+                sourcesMain.output
+        from(contents)
+    }
+    build {
+        dependsOn(fatJar)
+    }
+}

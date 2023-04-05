@@ -1,1 +1,1 @@
-web: ./build/install/Practice_TelegramBot/bin/Practice_TelegramBot
+web: java -Dserver.port=$PORT $JAVA_OPTS -jar ./build/libs/Practice_TelegramBot-1.0-practice-tochanenko-m2.jar
