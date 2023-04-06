@@ -73,7 +73,7 @@ class BotController {
                 for (ingredient in ingredients) {
                     val ingredientCalories = getCalories(ingredient)
                     totalCalories += ingredientCalories
-                    if (totalCalories > 0)
+                    if (ingredientCalories > 0)
                         response += "- ${ingredient.trimIndent()}: *$ingredientCalories* cal.\n"
                 }
 
