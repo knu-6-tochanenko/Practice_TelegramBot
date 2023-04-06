@@ -34,14 +34,24 @@ class BotController {
     suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
         val typingAction = TypingAction(update.user.id, bot).start()
 
+
         val ingredients: List<String>? = update.text?.let { getIngredients(it) }
-        var response = ""
+        var response = "Для страви, що складається з:\n"
+        var totalCalories: Int = 0
 
         for (ingredient in ingredients!!) {
-            response += "$ingredient: (${getCalories(ingredient)})\n\n"
+            val ingredientCalories = getCalories(ingredient)
+            totalCalories += ingredientCalories
+            response += "- $ingredient: *$ingredientCalories* cal.\n"
         }
 
+        response += "\n*Сумарна кількість калорій: $totalCalories*"
+
         typingAction.stop()
-        message { response }.send(update.user, bot)
+        message {
+            response
+        }.options {
+            parseMode = ParseMode.Markdown
+        }.send(update.user, bot)
     }
 }
