@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 fun log(user: User, input: String, output: String) {
-    if (parseEnvVar("HEROKU_TOKEN").isNotEmpty()) {
+    if (parseEnvVar("HEROKU_TOKEN").isEmpty()) {
         Files.createDirectories(Paths.get("/out/"));
         val time = System.currentTimeMillis()
         val date = Date(time)
