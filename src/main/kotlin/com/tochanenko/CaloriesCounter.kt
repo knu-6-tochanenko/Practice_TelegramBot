@@ -10,17 +10,20 @@ import com.aallam.openai.api.model.ModelId
 suspend fun getIngredients(input: String): List<String> {
     return chatGPTAnswer(
         "Знайди інгредієнти з такого списку" +
-                " і напиши їх у такому форматі \"інгредієнт (кількість)\", якщо ж ти не можеш знайти інгредієнтів, напиши \"пустий список\": $input"
-    ).split("\n")
+                " і напиши їх у такому форматі \"інгредієнт (кількість)\", якщо ж ти не можеш знайти інгредієнтів, напиши \"пустий список\": \"$input\""
+    ).split("\n", ",")
 }
 
 suspend fun getCaloriesString(ingredientName: String): String {
-    return chatGPTAnswer("Ти - система, яка визначає калорійність інгредієнта. Ти отримуєш на вхід назву інгредієнта і його кількість, а надаєш відповідь, що містить кількість калорій у цьому інгредієнті у такому форматі: \"інгредієнт - калорії\", якщо не можеш дати відповідь - просто пишеш \"0\", якщо не можеш дати точну кількість калорій - пиши приблизну. Дай відповідь на такий запит: $ingredientName")
+    return chatGPTAnswer("Ти - система, яка визначає калорійність інгредієнта. Ти отримуєш на вхід назву інгредієнта і його кількість, а надаєш відповідь, що містить кількість калорій у цьому інгредієнті у такому форматі: \"інгредієнт - калорії\", якщо не можеш дати відповідь - просто пишеш \"0\", якщо не можеш дати точну кількість калорій - пиши приблизну. Дай відповідь на такий запит: \"$ingredientName\"")
 }
 
 suspend fun getCalories(ingredientName: String): Int {
     val caloriesResponse = getCaloriesString(ingredientName)
-    val ingredientAmount = findNumbersInString(ingredientName)[0]
+    val calories = findNumbersInString(ingredientName)
+    if (calories.isEmpty())
+        return 0
+    val ingredientAmount = calories[0]
     val caloriesResponseNumbers = findNumbersInString(caloriesResponse)
 
     if (caloriesResponseNumbers.size > 1) {

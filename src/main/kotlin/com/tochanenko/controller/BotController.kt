@@ -2,6 +2,7 @@ package com.tochanenko.controller
 
 import com.tochanenko.getCalories
 import com.tochanenko.getIngredients
+import com.tochanenko.log.log
 import com.tochanenko.tools.TypingAction
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.annotations.CommandHandler
@@ -58,25 +59,32 @@ class BotController {
         val ingredients: List<String>? = update.text?.let { getIngredients(it) }
 
         if (ingredients != null) {
-            if (ingredients.isEmpty() || ingredients[0].contains("пустий список")) {
+            if (ingredients.isEmpty() || ingredients[0].contains("устий список")) {
                 typingAction.stop()
-                message {"Вибачте, я Вас не зрозумів. Можливо, Ви написали текст, що не містить інгредієнтів. Якщо це помилка Бота, зверніться до @tochanenko"}.send(update.user, bot)
-                return
+                message { "Вибачте, я Вас не зрозумів. Можливо, Ви написали текст, що не містить інгредієнтів. Якщо це помилка Бота, зверніться до @tochanenko" }.send(
+                    update.user,
+                    bot
+                )
+                log(update.user, update.text!!, "Not understood")
+            } else {
+                var response = "Для страви, що складається з:\n"
+                var totalCalories: Int = 0
+
+                for (ingredient in ingredients) {
+                    val ingredientCalories = getCalories(ingredient)
+                    totalCalories += ingredientCalories
+                    if (totalCalories > 0)
+                        response += "- ${ingredient.trimIndent()}: *$ingredientCalories* cal.\n"
+                }
+
+                response += "\n*Сумарна кількість калорій: $totalCalories*"
+
+                log(update.user, update.text!!, response)
+
+                typingAction.stop()
+                message { response }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
             }
         }
 
-        var response = "Для страви, що складається з:\n"
-        var totalCalories: Int = 0
-
-        for (ingredient in ingredients!!) {
-            val ingredientCalories = getCalories(ingredient)
-            totalCalories += ingredientCalories
-            response += "- $ingredient: *$ingredientCalories* cal.\n"
-        }
-
-        response += "\n*Сумарна кількість калорій: $totalCalories*"
-
-        typingAction.stop()
-        message { response }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
     }
 }
