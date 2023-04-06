@@ -1,12 +1,7 @@
 package com.tochanenko.controller
 
-import com.aallam.openai.api.BetaOpenAI
-import com.aallam.openai.api.chat.ChatCompletion
-import com.aallam.openai.api.chat.ChatCompletionRequest
-import com.aallam.openai.api.chat.ChatMessage
-import com.aallam.openai.api.chat.ChatRole
-import com.aallam.openai.api.model.ModelId
-import com.tochanenko.OPEN_AI
+import com.tochanenko.getCalories
+import com.tochanenko.getIngredients
 import com.tochanenko.tools.TypingAction
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.annotations.CommandHandler
@@ -35,23 +30,18 @@ class BotController {
             .send(update.user, bot)
     }
 
-    @OptIn(BetaOpenAI::class)
     @UnprocessedHandler
     suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
         val typingAction = TypingAction(update.user.id, bot).start()
 
-        val chatCompletionRequest = ChatCompletionRequest(
-            model = ModelId("gpt-3.5-turbo"),
-            messages = listOf(
-                ChatMessage(
-                    role = ChatRole.User,
-                    content = update.text!!
-                )
-            )
-        )
-        val completion: ChatCompletion = OPEN_AI.chatCompletion(chatCompletionRequest)
+        val ingredients: List<String>? = update.text?.let { getIngredients(it) }
+        var response = ""
+
+        for (ingredient in ingredients!!) {
+            response += "$ingredient: (${getCalories(ingredient)})\n\n"
+        }
 
         typingAction.stop()
-        message { completion.choices[0].message?.content ?: "" }.send(update.user, bot)
+        message { response }.send(update.user, bot)
     }
 }
