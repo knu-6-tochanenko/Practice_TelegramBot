@@ -10,7 +10,7 @@ import com.aallam.openai.api.model.ModelId
 suspend fun getIngredients(input: String): List<String> {
     return chatGPTAnswer(
         "Знайди інгредієнти з такого списку" +
-                " і напиши їх у такому форматі \"інгредієнт (кількість)\": $input"
+                " і напиши їх у такому форматі \"інгредієнт (кількість)\", якщо ж ти не можеш знайти інгредієнтів, напиши \"пустий список\": $input"
     ).split("\n")
 }
 
