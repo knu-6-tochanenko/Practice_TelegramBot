@@ -9,13 +9,16 @@ import com.aallam.openai.api.model.ModelId
 
 suspend fun getIngredients(input: String): List<String> {
     return chatGPTAnswer(
-        "Знайди інгредієнти з такого списку" +
-                " і напиши їх у такому форматі \"інгредієнт (кількість)\", якщо ж ти не можеш знайти інгредієнтів, напиши \"пустий список\": \"$input\""
+        userInput = "Знайди інгредієнти з такого списку: $input",
+        systemInput = "Ти - корисний асистент, який вилучає список інгредієнтів з тексту і пише їх у такому форматі: \"інгредієнт (кількість)\", якщо ж ти не можеш знайти список інгредієнтів, то напиши \"пустий список\""
     ).split("\n", ",")
 }
 
 suspend fun getCaloriesString(ingredientName: String): String {
-    return chatGPTAnswer("Ти - система, яка визначає калорійність інгредієнта. Ти отримуєш на вхід назву інгредієнта і його кількість, а надаєш відповідь, що містить кількість калорій у цьому інгредієнті у такому форматі: \"інгредієнт - калорії\", якщо не можеш дати відповідь - просто пишеш \"0\", якщо не можеш дати точну кількість калорій - пиши приблизну. Дай відповідь на такий запит: \"$ingredientName\"")
+    return chatGPTAnswer(
+        userInput = "Знайди калорійність інгредієнта $ingredientName",
+        systemInput = "Ти - корисний асистент, який визначає калорійність інгредієнта. Ти отримує на вхід назву інгредієнта і його кількість, а надаєш відповідь, що містить кількість калорій у цьому інгредієнті у такому форматі: \"інгредієнт - калорії\", якщо ж не можеш дати відповідь - пишеш \"0\", якщо ж не можеш дати точну кількість калорій, то пиши приблизну"
+    )
 }
 
 suspend fun getCalories(ingredientName: String): Int {
@@ -38,16 +41,26 @@ fun findNumbersInString(str: String): List<Int> =
         .toList()
 
 @OptIn(BetaOpenAI::class)
-suspend fun chatGPTAnswer(input: String): String {
+suspend fun chatGPTAnswer(userInput: String? = null, systemInput: String? = null): String {
+    val messages: MutableList<ChatMessage> = mutableListOf<ChatMessage>().toMutableList()
+    systemInput.let {
+        messages += ChatMessage(
+            role = ChatRole.System,
+            content = systemInput!!
+        )
+    }
+    userInput.let {
+        messages += ChatMessage(
+            role = ChatRole.User,
+            content = userInput!!
+        )
+    }
+
     val chatCompletionRequest = ChatCompletionRequest(
         model = ModelId("gpt-3.5-turbo"),
-        messages = listOf(
-            ChatMessage(
-                role = ChatRole.User,
-                content = input
-            )
-        )
+        messages = messages
     )
+
     val completion: ChatCompletion = OPEN_AI.chatCompletion(chatCompletionRequest)
     return completion.choices[0].message?.content ?: ""
 }
