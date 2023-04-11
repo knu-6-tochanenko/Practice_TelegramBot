@@ -1,5 +1,6 @@
 package com.tochanenko.controller
 
+import com.tochanenko.chatGPTAnswer
 import com.tochanenko.getCalories
 import com.tochanenko.getIngredients
 import com.tochanenko.log.log
@@ -49,6 +50,14 @@ class BotController {
         message { commandsMessage }
             .options { parseMode = ParseMode.Markdown }
             .send(update.user, bot)
+    }
+
+    @CommandHandler(["/t"])
+    suspend fun chatGPT(update: ProcessedUpdate, bot: TelegramBot) {
+        val message = update.text!!.toString()
+        val response = if (message.length > 2) chatGPTAnswer(userInput = message)
+        else "Введіть посилання до ChatGPT в одному повідомленні з командою /t"
+        message { response }.send(update.user, bot)
     }
 
     @UnprocessedHandler

@@ -43,18 +43,15 @@ fun findNumbersInString(str: String): List<Int> =
 @OptIn(BetaOpenAI::class)
 suspend fun chatGPTAnswer(userInput: String? = null, systemInput: String? = null): String {
     val messages: MutableList<ChatMessage> = mutableListOf<ChatMessage>().toMutableList()
-    systemInput.let {
-        messages += ChatMessage(
-            role = ChatRole.System,
-            content = systemInput!!
-        )
-    }
-    userInput.let {
-        messages += ChatMessage(
-            role = ChatRole.User,
-            content = userInput!!
-        )
-    }
+    if (systemInput != null) messages += ChatMessage(
+        role = ChatRole.System,
+        content = systemInput
+    )
+
+    if (userInput != null) messages += ChatMessage(
+        role = ChatRole.User,
+        content = userInput
+    )
 
     val chatCompletionRequest = ChatCompletionRequest(
         model = ModelId("gpt-3.5-turbo"),
