@@ -15,7 +15,7 @@ import eu.vendeli.tgbot.types.internal.ProcessedUpdate
 const val START = "/start"
 const val ABOUT = "/about"
 const val COMMANDS = "/commands"
-const val CHAT = "/chat"
+const val CHAT = "/t"
 
 const val helloMessage: String = "*Привіт!*\n\n" +
         "Я - бот, який допоможе тобі дізнатись кількість калорій в страві " +
@@ -64,10 +64,12 @@ class BotController {
 
     @CommandHandler([CHAT])
     suspend fun chatGPT(update: ProcessedUpdate, bot: TelegramBot) {
+        val typingAction = TypingAction(update.user.id, bot).start()
         val message = update.text!!.toString()
         val response = if (message.length > 2) chatGPTAnswer(userInput = message)
         else chatGPTMessage
         message { response }.send(update.user, bot)
+        typingAction.stop()
     }
 
     @UnprocessedHandler

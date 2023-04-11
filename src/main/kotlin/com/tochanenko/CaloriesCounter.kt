@@ -29,9 +29,10 @@ suspend fun getCalories(ingredientName: String): Int {
     val ingredientAmount = calories[0]
     val caloriesResponseNumbers = findNumbersInString(caloriesResponse)
 
-    if (caloriesResponseNumbers.size > 1) {
-        return if (caloriesResponseNumbers[0] == ingredientAmount) caloriesResponseNumbers[1] else caloriesResponseNumbers[0]
-    } else return caloriesResponseNumbers[0]
+    return if (caloriesResponseNumbers.size > 1) {
+        if (caloriesResponseNumbers[0] == ingredientAmount) caloriesResponseNumbers[1]
+        else caloriesResponseNumbers[0]
+    } else caloriesResponseNumbers[0]
 }
 
 fun findNumbersInString(str: String): List<Int> =
