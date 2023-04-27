@@ -19,7 +19,7 @@ const val COMMANDS = "/commands"
 const val CHAT = "/t"
 const val EXAMPLE = "/example"
 const val DISH = "/dish"
-const val INGREDIENTS_NEW = "/i_new"
+const val INGREDIENTS_OLD = "/i_old"
 
 const val helloMessage: String = "*Привіт!*\n\n" +
         "Я - бот, який допоможе тобі дізнатись кількість калорій в страві за її інгредієнтами та їх кількості в " +
@@ -105,17 +105,24 @@ class BotController {
         }
     }
 
-    @CommandHandler([INGREDIENTS_NEW])
+    @CommandHandler([INGREDIENTS_OLD])
     suspend fun getCaloriesForIngredient(update: ProcessedUpdate, bot: TelegramBot) {
-        val typingAction = TypingAction(update.user.id, bot).start()
-        val response = getIngredientsCaloriesGPT(update.text!!)
-        message { response }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
-        message { addMarkdown(response) }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
-        typingAction.stop()
+        getCaloriesForIngredientsOld(update, bot)
     }
 
     @UnprocessedHandler
-    suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
+    suspend fun anyUserInput(update: ProcessedUpdate, bot: TelegramBot) {
+        getCaloriesForIngredients(update, bot)
+    }
+
+    private suspend fun getCaloriesForIngredients(update: ProcessedUpdate, bot: TelegramBot) {
+        val typingAction = TypingAction(update.user.id, bot).start()
+        val response = getIngredientsCaloriesGPT(update.text!!)
+        typingAction.stop()
+        message { addMarkdown(response) }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+    }
+
+    private suspend fun getCaloriesForIngredientsOld(update: ProcessedUpdate, bot: TelegramBot) {
         val typingAction = TypingAction(update.user.id, bot).start()
         val ingredients: List<String>? = update.text?.let { getIngredientsGPT(it) }
 
