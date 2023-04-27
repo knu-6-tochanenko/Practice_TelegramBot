@@ -42,12 +42,17 @@ const val commandsMessage: String = "$ABOUT - Дізнатись більше п
 const val chatGPTMessage: String = "Введіть посилання до ChatGPT в одному повідомленні з командою $CHAT"
 
 const val unknownIngredientsMessage: String = "Вибачте, я Вас не зрозумів. Можливо, Ви написали " +
-        "текст, що не містить інгредієнтів. Якщо це помилка Бота, зверніться до @tochanenko"
+        "текст, що не містить інгредієнтів, які мають поживну цінність. Якщо це помилка Бота, зверніться до @tochanenko"
+
+const val unknownDishMessage: String = "Вибачте, я Вас не зрозумів. Напишіть назву страви одразу після команди " +
+        "/dish. Ящо ви знаєте приблизну кількість страви у грамах чи мілілітрах, можете також вказати її:\n\n" +
+        "/dish Чай з цукром 300 мілілітрів."
 
 const val exampleMessage: String = "Для визначення калорійності страви треба написати список інгредієнтів та їх " +
-        "кількість. Наприклад:\n\nЯйця 2 штуки\nСмажена котлета з телячого фаршу 50 грамів\nТвердий сир 30 грамів\n\n" +
-        "Або:\n\nАвокадо 100 грамів, оливкове масло 4 столові ложки, варена курина грудинка 50 грамів, червоний лук " +
-        "30грамів, томати 50 грамів, червоний перець 50 грамів."
+        "кількість. Наприклад:\n\n_Яйця 2 штуки_\n_Смажена котлета з телячого фаршу 50 грамів_\n_Твердий сир 30 " +
+        "грамів_\n\n" +
+        "Або:\n\n_Авокадо 100 грамів, оливкове масло 4 столові ложки, варена курина грудинка 50 грамів, червоний лук " +
+        "30грамів, томати 50 грамів, червоний перець 50 грамів._"
 
 class BotController {
     @CommandHandler([START])
@@ -90,26 +95,26 @@ class BotController {
 
     @CommandHandler([DISH])
     suspend fun getIngredientsForDish(update: ProcessedUpdate, bot: TelegramBot) {
-        val typingAction = TypingAction(update.user.id, bot).start()
-        val response: String = update.text?.let { getIngredientsForDishGPT(it) }!!
-        log(update.user, update.text!!, response)
-        message { response }.send(update.user, bot)
-        typingAction.stop()
+        if (update.text!!.substring("/dish".length).isNotBlank()) {
+            val typingAction = TypingAction(update.user.id, bot).start()
+            val response: String = update.text?.let { getIngredientsForDishGPT(it) }!!
+            log(update.user, update.text!!, response)
+            message { response }.send(update.user, bot)
+            typingAction.stop()
+        } else {
+            message { unknownDishMessage }.send(update.user, bot)
+        }
     }
 
     @UnprocessedHandler
     suspend fun saySomething(update: ProcessedUpdate, bot: TelegramBot) {
         val typingAction = TypingAction(update.user.id, bot).start()
-
         val ingredients: List<String>? = update.text?.let { getIngredientsGPT(it) }
 
         if (ingredients != null) {
             if (ingredients.isEmpty() || ingredients[0].contains("устий список")) {
                 typingAction.stop()
-                message { unknownIngredientsMessage }.send(
-                    update.user,
-                    bot
-                )
+                message { unknownIngredientsMessage }.send(update.user, bot)
                 log(update.user, update.text!!, "Not understood")
             } else {
                 var response = "Для страви, що складається з:\n"
@@ -123,11 +128,13 @@ class BotController {
                 }
 
                 response += "\n*Сумарна кількість калорій: $totalCalories*"
-
                 log(update.user, update.text!!, response)
-
                 typingAction.stop()
-                message { response }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+
+                message {
+                    if (totalCalories > 0) response
+                    else unknownIngredientsMessage
+                }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
             }
         }
     }

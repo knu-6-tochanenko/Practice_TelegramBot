@@ -18,6 +18,35 @@ Language of the bot: Ukrainian.
 * [Kotlin Telegram Bot](https://github.com/vendelieu/telegram-bot) - a Telegram Bot API wrapper with handy Kotlin DSL, developed by [Jey](https://github.com/vendelieu)
 * [Heroku](https://heroku.com) - a cloud PaaS. Used to deploy bot to the cloud.
 
+## Changelog
+
+### v1.1
+
+**New Features**
+
+* `/dish` command
+* `/example` command
+* Commands menu
+* Bot Description
+
+**Updates**
+
+* Improve Bot output texts
+
+**Bug Fixes**
+
+* Fix bug when list of ingredients have a total 0 calories
+
+### v1.0
+
+**New Features**
+
+* `/about` command
+* `/commands` command
+* Response to list of ingredients
+* Bot Image
+* Bot Description
+
 ## About
 
 Developed by Vladyslav Tochanenko as a part of University Internship on Faculty of Computer Science and Cybernetics, Taras Shevchenko National University of Kyiv.
