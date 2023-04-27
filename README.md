@@ -8,6 +8,8 @@ Language of the bot: Ukrainian.
 
 ## Algorithm
 
+> ⚠️ Algorithm is deprecated in v1.1. All operations are handled in ChatGPT since v1.1
+
 1. Ask ChatGPT to find a list of ingredients in user input and their quantity
 2. Ask ChatGPT for each ingredient it's calories for given amount
 3. Calculate total amount of calories and display this result in Message
@@ -24,14 +26,15 @@ Language of the bot: Ukrainian.
 
 **New Features**
 
+* `/changelog` command
 * `/dish` command
 * `/example` command
 * Commands menu
-* Bot Description
+* Bot Description on Start Screen
 
 **Updates**
 
-* Improve algorithm of ingredients list command
+* Improve algorithm of ingredients calories. Works `N + 1` times faster than on 1.0 version, where `N` - is number of ingredients
 * Improve Bot output texts
 
 **Bug Fixes**

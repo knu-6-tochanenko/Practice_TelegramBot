@@ -20,6 +20,7 @@ const val CHAT = "/t"
 const val EXAMPLE = "/example"
 const val DISH = "/dish"
 const val INGREDIENTS_OLD = "/i_old"
+const val CHANGELOG = "/changelog"
 
 const val helloMessage: String = "*Привіт!*\n\n" +
         "Я - бот, який допоможе тобі дізнатись кількість калорій в страві за її інгредієнтами та їх кількості в " +
@@ -30,7 +31,7 @@ const val aboutMessage: String = "$helloMessage\n\n" +
         "Мене розробив *Владислав Точаненко* у 2023 році. Я є частиною виробничої практики, яку студенти " +
         "магістратури проходять на факультеті Комп'ютерних наук та кібернетики, КНУ ім Т. Шевченка. Якщо у Вас " +
         "з'явились якісь питання, можете звертатись до @tochanenko.\n\n" +
-        "Версія: $VERSION"
+        "Версія: $VERSION, дивіться у /changelog що тут новенького з'явилось."
 
 const val commandsMessage: String = "$ABOUT - Дізнатись більше про цей бот і про його власника\n" +
         "$COMMANDS - Список усіх доступних команд\n" +
@@ -52,6 +53,33 @@ const val exampleMessage: String = "Для визначення калорійн
         "грамів_\n\n" +
         "Або:\n\n_Авокадо 100 грамів, оливкове масло 4 столові ложки, варена курина грудинка 50 грамів, червоний лук " +
         "30грамів, томати 50 грамів, червоний перець 50 грамів._"
+
+val changelogMessage: String = """
+    *v1.1*
+
+    _Новий функціонал_
+    - Команда /changelog
+    - Команда /dish
+    - Команда /example
+    - Меню команд бота
+    - Опис бота на стартовому екрані
+
+    _Оновлення_
+    - Покращений алгоритм визначення калорійності інгредієнтів. Працює у `N + 1` разів швидше за алгоритм версії 1.0. `N` - кількість інгредієнтів
+    - Покращений текст відповідей бота
+
+    _Виправлення помилок_
+    - Виправлена помилка пустої відповіді коли сумарна кількість калорій дорівнює 0
+
+    *v1.0*
+
+    _Новий функціонал_
+    - Команда /about
+    - Команда /commands
+    - Визначення калорійності страви за інгредієнтами
+    - Зображення бота
+    - Опис бота
+""".trimIndent()
 
 class BotController {
     @CommandHandler([START])
@@ -105,6 +133,11 @@ class BotController {
         }
     }
 
+    @CommandHandler([CHANGELOG])
+    suspend fun getChangelog(update: ProcessedUpdate, bot: TelegramBot) {
+        message { changelogMessage }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+    }
+
     @CommandHandler([INGREDIENTS_OLD])
     suspend fun getCaloriesForIngredient(update: ProcessedUpdate, bot: TelegramBot) {
         getCaloriesForIngredientsOld(update, bot)
@@ -122,6 +155,7 @@ class BotController {
         message { addMarkdown(response) }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
     }
 
+    @Deprecated(message = "This method uses old version of getting calories amount for calories. It works N+1 slower then the new version. It consumes a lot more OpenAI tokens then the new algorithm.")
     private suspend fun getCaloriesForIngredientsOld(update: ProcessedUpdate, bot: TelegramBot) {
         val typingAction = TypingAction(update.user.id, bot).start()
         val ingredients: List<String>? = update.text?.let { getIngredientsGPT(it) }
