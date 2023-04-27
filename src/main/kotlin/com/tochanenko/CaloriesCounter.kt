@@ -7,22 +7,29 @@ import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.model.ModelId
 
-suspend fun getIngredients(input: String): List<String> {
+suspend fun getIngredientsGPT(input: String): List<String> {
     return chatGPTAnswer(
         userInput = "Знайди інгредієнти з такого списку: $input",
         systemInput = "Ти - корисний асистент, який вилучає список інгредієнтів з тексту і пише їх у такому форматі: \"інгредієнт (кількість)\", якщо ж ти не можеш знайти список інгредієнтів, то напиши \"пустий список\""
     ).split("\n", ",")
 }
 
-suspend fun getCaloriesString(ingredientName: String): String {
+suspend fun getCaloriesStringGPT(ingredientName: String): String {
     return chatGPTAnswer(
         userInput = "Знайди калорійність інгредієнта $ingredientName",
-        systemInput = "Ти - корисний асистент, який визначає калорійність інгредієнта. Ти отримує на вхід назву інгредієнта і його кількість, а надаєш відповідь, що містить кількість калорій у цьому інгредієнті у такому форматі: \"інгредієнт - калорії\", якщо ж не можеш дати відповідь - пишеш \"0\", якщо ж не можеш дати точну кількість калорій, то пиши приблизну"
+        systemInput = "Ти - корисний асистент, який визначає калорійність інгредієнта. Ти отримуєш на вхід назву інгредієнта і його кількість, а надаєш відповідь, що містить кількість калорій у цьому інгредієнті у такому форматі: \"інгредієнт - калорії\", якщо ж не можеш дати відповідь - пишеш \"0\", якщо ж не можеш дати точну кількість калорій, то пиши приблизну"
     )
 }
 
-suspend fun getCalories(ingredientName: String): Int {
-    val caloriesResponse = getCaloriesString(ingredientName)
+suspend fun getIngredientsForDishGPT(input: String): String {
+    return chatGPTAnswer(
+        userInput = input,
+        systemInput = "Ти - корисний асистент, який визначає калорійність страви за її назвою та кількістю. Ти отримуєш на вхід назву страви та її кількість, якщо кількість не вказана, то вважай що страви одна порція. Ти видаєш відповідь у такому форматі: \"[назва страви] - [приблизна кількість калорій одним числом або проміжком]\"."
+    )
+}
+
+suspend fun getCaloriesGPT(ingredientName: String): Int {
+    val caloriesResponse = getCaloriesStringGPT(ingredientName)
     val calories = findNumbersInString(ingredientName)
     if (calories.isEmpty())
         return 0
