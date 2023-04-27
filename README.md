@@ -31,6 +31,7 @@ Language of the bot: Ukrainian.
 
 **Updates**
 
+* Improve algorithm of ingredients list command
 * Improve Bot output texts
 
 **Bug Fixes**

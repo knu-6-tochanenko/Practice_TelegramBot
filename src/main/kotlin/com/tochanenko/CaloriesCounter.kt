@@ -7,6 +7,13 @@ import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.model.ModelId
 
+suspend fun getIngredientsCaloriesGPT(input: String): String {
+    return chatGPTAnswer(
+        userInput = input,
+        systemInput = "Ти - корисний асистент, який спочатку вилучає список інгредієнтів з тексту, а також визначає їх калорійність, враховуючи їх кількість. Також ти визначаєш сумарну кількість калорій у страві, сумуючи калорійність кожного інгредієнта. Ти надаєш відповідь у такому форматі: Список інгредієнтів, кожен рядок з якого виглядає як \"- інгредієнт, кількість інгредієнту - калорійність cal.\", а останній рядок містить фразу \"Калорійність страви: x cal.\", де x - сума калорійностей кожного з інгредієнтів."
+    )
+}
+
 suspend fun getIngredientsGPT(input: String): List<String> {
     return chatGPTAnswer(
         userInput = "Знайди інгредієнти з такого списку: $input",

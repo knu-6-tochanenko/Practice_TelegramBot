@@ -1,11 +1,9 @@
 package com.tochanenko.controller
 
-import com.tochanenko.chatGPTAnswer
-import com.tochanenko.getCaloriesGPT
-import com.tochanenko.getIngredientsForDishGPT
-import com.tochanenko.getIngredientsGPT
+import com.tochanenko.*
 import com.tochanenko.log.log
 import com.tochanenko.tools.TypingAction
+import com.tochanenko.tools.addMarkdown
 import eu.vendeli.tgbot.TelegramBot
 import eu.vendeli.tgbot.annotations.CommandHandler
 import eu.vendeli.tgbot.annotations.UnprocessedHandler
@@ -21,6 +19,7 @@ const val COMMANDS = "/commands"
 const val CHAT = "/t"
 const val EXAMPLE = "/example"
 const val DISH = "/dish"
+const val INGREDIENTS_NEW = "/i_new"
 
 const val helloMessage: String = "*Привіт!*\n\n" +
         "Я - бот, який допоможе тобі дізнатись кількість калорій в страві за її інгредієнтами та їх кількості в " +
@@ -104,6 +103,15 @@ class BotController {
         } else {
             message { unknownDishMessage }.send(update.user, bot)
         }
+    }
+
+    @CommandHandler([INGREDIENTS_NEW])
+    suspend fun getCaloriesForIngredient(update: ProcessedUpdate, bot: TelegramBot) {
+        val typingAction = TypingAction(update.user.id, bot).start()
+        val response = getIngredientsCaloriesGPT(update.text!!)
+        message { response }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+        message { addMarkdown(response) }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+        typingAction.stop()
     }
 
     @UnprocessedHandler
