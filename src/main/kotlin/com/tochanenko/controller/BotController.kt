@@ -124,7 +124,7 @@ class BotController {
     suspend fun getIngredientsForDish(update: ProcessedUpdate, bot: TelegramBot) {
         if (update.text!!.substring("/dish".length).isNotBlank()) {
             val typingAction = TypingAction(update.user.id, bot).start()
-            val response: String = update.text?.let { getIngredientsForDishGPT(it) }!!
+            val response: String = update.text?.let { getCaloriesByIngredientsForDishGPT(it) }!!
             log(update.user, update.text!!, response)
             message { response }.send(update.user, bot)
             typingAction.stop()
@@ -158,33 +158,9 @@ class BotController {
     @Deprecated(message = "This method uses old version of getting calories amount for calories. It works N+1 slower then the new version. It consumes a lot more OpenAI tokens then the new algorithm.")
     private suspend fun getCaloriesForIngredientsOld(update: ProcessedUpdate, bot: TelegramBot) {
         val typingAction = TypingAction(update.user.id, bot).start()
-        val ingredients: List<String>? = update.text?.let { getIngredientsGPT(it) }
-
-        if (ingredients != null) {
-            if (ingredients.isEmpty() || ingredients[0].contains("устий список")) {
-                typingAction.stop()
-                message { unknownIngredientsMessage }.send(update.user, bot)
-                log(update.user, update.text!!, "Not understood")
-            } else {
-                var response = "Для страви, що складається з:\n"
-                var totalCalories: Int = 0
-
-                for (ingredient in ingredients) {
-                    val ingredientCalories = getCaloriesGPT(ingredient)
-                    totalCalories += ingredientCalories
-                    if (ingredientCalories > 0)
-                        response += "- ${ingredient.trimIndent()}: *$ingredientCalories* cal.\n"
-                }
-
-                response += "\n*Сумарна кількість калорій: $totalCalories*"
-                log(update.user, update.text!!, response)
-                typingAction.stop()
-
-                message {
-                    if (totalCalories > 0) response
-                    else unknownIngredientsMessage
-                }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
-            }
-        }
+        val response = getCaloriesByIngredients(update, bot)
+        message { response }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+        log(update.user, update.text!!, response)
+        typingAction.stop()
     }
 }

@@ -6,6 +6,12 @@ import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.model.ModelId
+import com.tochanenko.controller.unknownIngredientsMessage
+import com.tochanenko.log.log
+import eu.vendeli.tgbot.TelegramBot
+import eu.vendeli.tgbot.api.message
+import eu.vendeli.tgbot.types.ParseMode
+import eu.vendeli.tgbot.types.internal.ProcessedUpdate
 
 suspend fun getIngredientsCaloriesGPT(input: String): String {
     return chatGPTAnswer(
@@ -28,11 +34,38 @@ suspend fun getCaloriesStringGPT(ingredientName: String): String {
     )
 }
 
-suspend fun getIngredientsForDishGPT(input: String): String {
+suspend fun getCaloriesByIngredientsForDishGPT(input: String): String {
     return chatGPTAnswer(
         userInput = input,
         systemInput = "Ти - корисний асистент, який визначає калорійність страви за її назвою та кількістю. Ти отримуєш на вхід назву страви та її кількість, якщо кількість не вказана, то вважай що страви одна порція. Ти видаєш відповідь у такому форматі: \"[назва страви] - [приблизна кількість калорій одним числом або проміжком]\"."
     )
+}
+
+suspend fun getCaloriesByIngredients(update: ProcessedUpdate, bot: TelegramBot): String {
+    val ingredients: List<String>? = update.text?.let { getIngredientsGPT(it) }
+
+    if (ingredients != null) {
+        if (ingredients.isEmpty() || ingredients[0].contains("устий список")) {
+            return unknownIngredientsMessage
+        } else {
+            var response = "Для страви, що складається з:\n"
+            var totalCalories: Int = 0
+
+            for (ingredient in ingredients) {
+                val ingredientCalories = getCaloriesGPT(ingredient)
+                totalCalories += ingredientCalories
+                if (ingredientCalories > 0)
+                    response += "- ${ingredient.trimIndent()}: *$ingredientCalories* cal.\n"
+            }
+
+            response += "\n*Сумарна кількість калорій: $totalCalories*"
+
+            return if (totalCalories > 0) response
+                else unknownIngredientsMessage
+        }
+    }
+
+    return unknownIngredientsMessage
 }
 
 suspend fun getCaloriesGPT(ingredientName: String): Int {
