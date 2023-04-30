@@ -41,6 +41,13 @@ suspend fun getCaloriesByIngredientsForDishGPT(input: String): String {
     )
 }
 
+suspend fun translateIntoEnglish(input: String): String {
+    return chatGPTAnswer(
+        userInput = input,
+        systemInput = "You are a useful tool that is used to translate text from any language to English language. You have some text as input, as output you give translated text."
+    )
+}
+
 suspend fun getCaloriesByIngredients(update: ProcessedUpdate, bot: TelegramBot): String {
     val ingredients: List<String>? = update.text?.let { getIngredientsGPT(it) }
 

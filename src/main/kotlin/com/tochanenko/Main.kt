@@ -15,6 +15,7 @@ import kotlinx.coroutines.runBlocking
 val TELEGRAM_API_TOKEN = parseEnvVar("apiKey")
 val OPENAI_API_TOKEN = parseEnvVar("OpenAIApiKey")
 val OPEN_AI = OpenAI(OPENAI_API_TOKEN)
+val CALORIE_NINJAS_API_TOKEN = parseEnvVar("CalorieNinjasApiKey")
 
 fun main(): Unit = runBlocking {
     if (TELEGRAM_API_TOKEN.isEmpty()) {

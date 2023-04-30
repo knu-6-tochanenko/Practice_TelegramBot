@@ -2,6 +2,7 @@ package com.tochanenko.controller
 
 import com.tochanenko.*
 import com.tochanenko.log.log
+import com.tochanenko.test.checkCalories
 import com.tochanenko.tools.TypingAction
 import com.tochanenko.tools.addMarkdown
 import eu.vendeli.tgbot.TelegramBot
@@ -11,7 +12,7 @@ import eu.vendeli.tgbot.api.message
 import eu.vendeli.tgbot.types.ParseMode
 import eu.vendeli.tgbot.types.internal.ProcessedUpdate
 
-const val VERSION = "1.1"
+const val VERSION = "1.2"
 
 const val START = "/start"
 const val ABOUT = "/about"
@@ -21,6 +22,7 @@ const val EXAMPLE = "/example"
 const val DISH = "/dish"
 const val INGREDIENTS_OLD = "/i_old"
 const val CHANGELOG = "/changelog"
+const val TEST = "/test"
 
 const val helloMessage: String = "*Привіт!*\n\n" +
         "Я - бот, який допоможе тобі дізнатись кількість калорій в страві за її інгредієнтами та їх кількості в " +
@@ -35,11 +37,16 @@ const val aboutMessage: String = "$helloMessage\n\n" +
 
 const val commandsMessage: String = "$ABOUT - Дізнатись більше про цей бот і про його власника\n" +
         "$COMMANDS - Список усіх доступних команд\n" +
-        "$DISH [назва страви] - Дізнатись приблизну калорійність страви " +
-        "[Будь-який текст, що містить інгредієнти та їх кількість] - Дізнатись калорійність кожного інгредієнта " +
-        "окремо та калорійність усієї страви"
+        "$DISH [назва страви] - Дізнатись приблизну калорійність страви\n" +
+        "`[ Будь-який текст, що містить інгредієнти та їх кількість ]` - Дізнатись калорійність кожного інгредієнта " +
+        "окремо та калорійність усієї страви\n" +
+        "$TEST `[ список інгредієнтів та їх кількість ]` - Працює як повідомлення без команди, проте також видає " +
+        "коректність визначення калорійності страви сервісом ChatGPT за допомогою сервісу CalorieNinjas\n"
 
 const val chatGPTMessage: String = "Введіть посилання до ChatGPT в одному повідомленні з командою $CHAT"
+
+const val testMessage: String = "Вибачте, я Вас не зрозумів. Можливо, Ви написали текст, що не містить інгредієнтів, " +
+        "які мають поживну цінність. Напишіть текст з інгредієнтами в одному повідомлення з командою /test"
 
 const val unknownIngredientsMessage: String = "Вибачте, я Вас не зрозумів. Можливо, Ви написали " +
         "текст, що не містить інгредієнтів, які мають поживну цінність. Якщо це помилка Бота, зверніться до @tochanenko"
@@ -55,12 +62,17 @@ const val exampleMessage: String = "Для визначення калорійн
         "30грамів, томати 50 грамів, червоний перець 50 грамів._"
 
 val changelogMessage: String = """
+    *v1.2*
+    
+    _Новий функціонал_
+    - Команда /test - тестування правильності роботи бота за допомогою сервісу CalorieNinjas
+    
     *v1.1*
 
     _Новий функціонал_
-    - Команда /changelog
-    - Команда /dish
-    - Команда /example
+    - Команда /changelog - список змін
+    - Команда /dish - визначення калорійності страви
+    - Команда /example - приклад використання
     - Меню команд бота
     - Опис бота на стартовому екрані
 
@@ -74,8 +86,8 @@ val changelogMessage: String = """
     *v1.0*
 
     _Новий функціонал_
-    - Команда /about
-    - Команда /commands
+    - Команда /about - інформація про бота
+    - Команда /commands - наявні команди з їх описом
     - Визначення калорійності страви за інгредієнтами
     - Зображення бота
     - Опис бота
@@ -143,6 +155,11 @@ class BotController {
         getCaloriesForIngredientsOld(update, bot)
     }
 
+    @CommandHandler([TEST])
+    suspend fun getCaloriesChecked(update: ProcessedUpdate, bot: TelegramBot) {
+        getCaloriesForIngredientsAndCheck(update, bot)
+    }
+
     @UnprocessedHandler
     suspend fun anyUserInput(update: ProcessedUpdate, bot: TelegramBot) {
         getCaloriesForIngredients(update, bot)
@@ -153,6 +170,46 @@ class BotController {
         val response = getIngredientsCaloriesGPT(update.text!!)
         typingAction.stop()
         message { addMarkdown(response) }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+    }
+
+    private suspend fun getCaloriesForIngredientsAndCheck(update: ProcessedUpdate, bot: TelegramBot) {
+        val typingAction = TypingAction(update.user.id, bot).start()
+        val response: String
+
+        if (update.text!!.toString().length > TEST.length)
+            response = getIngredientsCaloriesGPT(update.text!!)
+        else {
+            message { testMessage }.send(update.user, bot)
+            typingAction.stop()
+            return
+        }
+        message { addMarkdown(response) }.options { parseMode = ParseMode.Markdown }.send(update.user, bot)
+
+        typingAction.stop()
+        typingAction.start()
+
+        val numberRegex = "\\d+".toRegex()
+        val numberSequences: Sequence<MatchResult> = numberRegex.findAll(response)
+
+        if (numberSequences.none()) {
+            message { "Помилка знаходження калорій"}.send(update.user, bot)
+            typingAction.stop()
+            return
+        }
+
+        val firstNumber: Int = numberSequences.last().range.first
+        val lastNumber: Int = numberSequences.last().range.last
+        val calories = response.substring(firstNumber, lastNumber + 1).toInt()
+        val translated = translateIntoEnglish(update.text!!)
+
+        checkCalories(
+            translated,
+            calories.toDouble(),
+            update.user,
+            bot
+        )
+
+        typingAction.stop()
     }
 
     @Deprecated(message = "This method uses old version of getting calories amount for calories. It works N+1 slower then the new version. It consumes a lot more OpenAI tokens then the new algorithm.")

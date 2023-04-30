@@ -24,6 +24,8 @@ dependencies {
     implementation("io.ktor:ktor-server-core-jvm:2.2.4")
     implementation("io.ktor:ktor-server-netty-jvm:2.2.4")
     implementation("com.aallam.openai:openai-client:3.2.0")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
 
 tasks.test {
@@ -37,6 +39,7 @@ kotlin {
 tasks.named<JavaExec>("run") {
     systemProperty("apiKey", System.getProperty("apiKey"))
     systemProperty("OpenAIApiKey", System.getProperty("OpenAIApiKey"))
+    systemProperty("CalorieNinjasApiKey", System.getProperty("CalorieNinjasApiKey"))
 }
 
 tasks.create("stage").dependsOn("installDist")
