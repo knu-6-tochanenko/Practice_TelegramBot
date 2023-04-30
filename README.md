@@ -8,7 +8,7 @@ Language of the bot: Ukrainian.
 
 ## Algorithm
 
-> ⚠️ Algorithm is deprecated in v1.1. All operations are handled in ChatGPT since v1.1
+> ⚠️ Algorithm is deprecated in v1.1. All operations are handled by ChatGPT since v1.1
 
 1. Ask ChatGPT to find a list of ingredients in user input and their quantity
 2. Ask ChatGPT for each ingredient it's calories for given amount
@@ -21,6 +21,12 @@ Language of the bot: Ukrainian.
 * [Heroku](https://heroku.com) - a cloud PaaS. Used to deploy bot to the cloud.
 
 ## Changelog
+
+### v1.2
+
+**New Features**
+
+* `/test` command
 
 ### v1.1
 
